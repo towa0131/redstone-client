@@ -7,7 +7,7 @@ use client\protocol\FullChunkDataPacket;
 use client\protocol\LoginPacket;
 use client\protocol\ResourcePackClientResponsePacket;
 use client\protocol\RequestChunkRadiusPacket;
-use client\protocol\OPEN_CONNECTION_REQUEST_2;
+//use client\protocol\OPEN_CONNECTION_REQUEST_2;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\LoginStatusPacket;
@@ -19,6 +19,7 @@ use raklib\protocol\CLIENT_CONNECT_DataPacket;
 use raklib\protocol\OPEN_CONNECTION_REPLY_1;
 use raklib\protocol\OPEN_CONNECTION_REPLY_2;
 use raklib\protocol\OPEN_CONNECTION_REQUEST_1;
+use raklib\protocol\OPEN_CONNECTION_REQUEST_2;
 use raklib\protocol\Packet;
 use raklib\protocol\PING_DataPacket;
 use raklib\protocol\SERVER_HANDSHAKE_DataPacket;
@@ -55,42 +56,37 @@ class MCPEClient{
 				$pk = new OPEN_CONNECTION_REQUEST_2();
 				$pk->serverAddress = $connection->getIp();
 				$pk->serverPort = $connection->getPort();
-				$pk->mtuSize = $packet->mtuSize;
+				$pk->mtuSize = 1447;
 				$pk->clientID = 1;
 				$connection->sendPacket($pk);
 				break;
 			case OPEN_CONNECTION_REPLY_2::class:
 				$pk = new CLIENT_CONNECT_DataPacket();
 				$pk->clientID = 1;
-				$pk->sendPing = 1;
-				//$pk->session = 1;
+				$pk->sendPing = mt_rand(1,100);
 				$connection->sendEncapsulatedPacket($pk);
 				break;
 			case SERVER_HANDSHAKE_DataPacket::class:
+				$addresses = [];
+				$addresses[0] = ["127.0.0.1", 0, 4];
+				for($i = 1;$i<10;$i++){
+					$addresses[$i] = ["0.0.0.0", 0, 4];
+				}
 				$pk = new CLIENT_HANDSHAKE_DataPacket();
-				$pk->address = "127.0.0.1";
+				$pk->address = $connection->getIp();
 				$pk->port = $connection->getPort();
-				$pk->systemAddresses = $packet->systemAddresses;
-				$pk->sendPing = 10;
-				$pk->sendPong = 1;
+				$pk->systemAddresses = $addresses;
+				$pk->sendPing = mt_rand(1,100);
+				$pk->sendPong = mt_rand(1,100);
 				
 				$connection->sendEncapsulatedPacket($pk);
 
-				$uuid = mt_rand(10000000,99999999) . "-" . mt_rand(1000,9999) . "-" . mt_rand(1000,9999) . "-" . mt_rand(1000,9999) . "-" . mt_rand(100000000000,999999999999);
-				/*$pk = new LoginPacket();
+				$uuid = "55cec0c2-c024-489f-8405-684e3e355aaf";
+				$pk = new LoginPacket();
 				$pk->protocol = ProtocolInfo::CURRENT_PROTOCOL;
-				$pk->clientUUID = $uuid;
-				$pk->clientId = mt_rand(1000000,9999999);
-				$pk->clientData["SkinGeometryName"] = "";
-				$pk->clientData["SkinGeometry"] = "";
-				$pk->clientData["CapeData"] = "";
-				$pk->clientData["SkinId"] = "Standard_Custom";
-				$pk->clientData["SkinData"] = base64_encode(file_get_contents("skin.txt"));
-				$pk->chainData = ["chain" => []];
-				$pk->webToken[0]["extraData"]["displayName"] = $this->name;
-				$pk->clientDataJwt = "eyJ4NXUiOiJNSFl3RUFZSEtvWkl6ajBDQVFZRks0RUVBQ0lEWWdBRThFTGtpeHlMY3dsWnJ5VVFjdTFUdlBPbUkyQjd2WDgzbmRuV1JVYVhtNzR3RmZhNWZcL2x3UU5UZnJMVkhhMlBtZW5wR0k2SmhJTVVKYVdacmptTWo5ME5vS05GU05CdUtkbThyWWlYc2ZhejNLMzZ4XC8xVTI2SHBHMFp4S1wvVjFWIn0.W10.QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB";
+				$pk->string = "eyJ4NXUiOiJNSFl3RUFZSEtvWkl6ajBDQVFZRks0RUVBQ0lEWWdBRThFTGtpeHlMY3dsWnJ5VVFjdTFUdlBPbUkyQjd2WDgzbmRuV1JVYVhtNzR3RmZhNWZcL2x3UU5UZnJMVkhhMlBtZW5wR0k2SmhJTVVKYVdacmptTWo5ME5vS05GU05CdUtkbThyWWlYc2ZhejNLMzZ4XC8xVTI2SHBHMFp4S1wvVjFWIn0.W10.QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB";
 				$connection->sendEncapsulatedPacket($pk);
-
+/*
 				$pk = new ResourcePackClientResponsePacket();
 				$pk->status = 4;
 				$pk->packIds = [];
