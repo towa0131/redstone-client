@@ -24,6 +24,7 @@ class OPEN_CONNECTION_REPLY_1 extends Packet{
 	public static $ID = 0x06;
 
 	public $serverID;
+	public $security;
 	public $mtuSize;
 
 	public function encode(){
@@ -38,7 +39,7 @@ class OPEN_CONNECTION_REPLY_1 extends Packet{
 		parent::decode();
 		$this->offset += 16; //Magic
 		$this->serverID = $this->getLong();
-		$this->getByte(); //security
+		$this->security = $this->getByte(); //security
 		$this->mtuSize = $this->getShort();
 	}
 }

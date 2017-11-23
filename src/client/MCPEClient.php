@@ -7,6 +7,7 @@ use client\protocol\FullChunkDataPacket;
 use client\protocol\LoginPacket;
 use client\protocol\ResourcePackClientResponsePacket;
 use client\protocol\RequestChunkRadiusPacket;
+use client\JWT\Akita_JOSE_JWS;
 //use client\protocol\OPEN_CONNECTION_REQUEST_2;
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
@@ -43,24 +44,29 @@ class MCPEClient{
 	}
 
 	public function handlePacket(ClientConnection $connection, Packet $packet){
-		echo "[Receive] " . get_class($packet) . "\n";
+		echo "[Receive] " . get_class($packet) . PHP_EOL;
 		switch(get_class($packet)){
 			case UNCONNECTED_PONG::class:
+				echo "[ServerName]" . $packet->serverName . PHP_EOL;
 				$connection->setName($packet->serverName);
 				$connection->setIsConnected(true);
 				$pk = new OPEN_CONNECTION_REQUEST_1();
-				$pk->mtuSize = 1447;
+				$pk->mtuSize = 1465;
 				$connection->sendPacket($pk);
 				break;
 			case OPEN_CONNECTION_REPLY_1::class:
+				echo "[ServerID]" . $packet->serverID . PHP_EOL;
+				echo "[Security]" . $packet->security . PHP_EOL;
+				echo "[MTU]" . $packet->mtuSize . PHP_EOL;
 				$pk = new OPEN_CONNECTION_REQUEST_2();
 				$pk->serverAddress = $connection->getIp();
 				$pk->serverPort = $connection->getPort();
-				$pk->mtuSize = 1447;
-				$pk->clientID = 1;
+				$pk->mtuSize = 1465;
+				$pk->clientID = 9999;
 				$connection->sendPacket($pk);
 				break;
 			case OPEN_CONNECTION_REPLY_2::class:
+				echo "[MTU]" . $packet->mtuSize . PHP_EOL;
 				$pk = new CLIENT_CONNECT_DataPacket();
 				$pk->clientID = 1;
 				$pk->sendPing = mt_rand(1,100);
@@ -78,7 +84,7 @@ class MCPEClient{
 				$pk->systemAddresses = $addresses;
 				$pk->sendPing = mt_rand(1,100);
 				$pk->sendPong = mt_rand(1,100);
-				
+
 				$connection->sendEncapsulatedPacket($pk);
 
 				$pk = new LoginPacket();
@@ -86,18 +92,12 @@ class MCPEClient{
 				$pk->string = "eyJ4NXUiOiJNSFl3RUFZSEtvWkl6ajBDQVFZRks0RUVBQ0lEWWdBRThFTGtpeHlMY3dsWnJ5VVFjdTFUdlBPbUkyQjd2WDgzbmRuV1JVYVhtNzR3RmZhNWZcL2x3UU5UZnJMVkhhMlBtZW5wR0k2SmhJTVVKYVdacmptTWo5ME5vS05GU05CdUtkbThyWWlYc2ZhejNLMzZ4XC8xVTI2SHBHMFp4S1wvVjFWIn0.W10.QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB";
 				$connection->sendEncapsulatedPacket($pk);
 /*
-				$pk = new ResourcePackClientResponsePacket();
-				$pk->status = 4;
-				$pk->packIds = [];
-				$connection->sendEncapsulatedPacket($pk);
-
 				$pk = new RequestChunkRadiusPacket();
 				$pk->radius = 8;
 				$connection->sendEncapsulatedPacket($pk);
 */
 				$pk = new PING_DataPacket();
-				$pk->pingID = rand(0, 100);
-				//$connection->sendEncapsulatedPacket($pk);
+				$pk->pingID = mt_rand(0, 100);
 				$connection->sendEncapsulatedPacket($pk);
 				break;
 			default:

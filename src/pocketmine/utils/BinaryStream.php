@@ -81,7 +81,7 @@ class BinaryStream{
 	public function getRemaining() : string{
 		$str = substr($this->buffer, $this->offset);
 		$this->offset = strlen($this->buffer);
-		return $str;
+		return (string)$str;
 	}
 
 	public function put(string $str){

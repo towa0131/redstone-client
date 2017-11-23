@@ -18,6 +18,7 @@ use client\Tickable;
 class ClientConnection extends UDPServerSocket implements Tickable{
 
 	const START_PORT = 49666;
+
 	private static $instanceId = 0;
 
 	private $isConnected;
@@ -59,27 +60,27 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 	/**
 	 * @return string
 	 */
-	public function getName()
-	{
+	public function getName(){
 		return $this->name;
 	}
 
 	/**
 	 * @param string $name
 	 */
-	public function setName($name)
-	{
+	public function setName($name){
 		$this->name = $name;
 	}
+
 	public function sendPacket(Packet $packet){
-		print "[Send] " . get_class($packet) . "\n";
+		print "[Send] " . get_class($packet) . PHP_EOL;
 		$this->lastSendTime = time();
 		$packet->encode();
 		return $this->writePacket($packet->buffer, $this->ip, $this->port);
 	}
+
 	public function sendEncapsulatedPacket($packet){
 		if($packet instanceof Packet || $packet instanceof PMDataPacket) {
-			print "[Send] " . get_class($packet) . "\n";
+			print "[Send] " . get_class($packet) . PHP_EOL;
 			$packet->encode();
 			$encapsulated = new EncapsulatedPacket();
 			$encapsulated->reliability = 0;
@@ -90,11 +91,11 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 			$sendPacket->packets[] = $encapsulated->toBinary();
 
 			return $this->sendPacket($sendPacket);
-		}
-		else{
+		}else{
 			return false;
 		}
 	}
+
 	public function receivePacket(){
 		if ($this->readPacket($buffer, $this->ip, $this->port) > 0) {
 			if (($packet = StaticPacketPool::getPacketFromPool(ord($buffer{0}))) !== null) {
@@ -106,11 +107,11 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 				return $packet;
 			}
 			return $buffer;
-		}
-		else{
+		}else{
 			return false;
 		}
 	}
+
 	public function tick(){
 		if(!$this->isConnected() && $this->lastSendTime !== time()){
 			$ping = new UNCONNECTED_PING();
@@ -132,25 +133,21 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 						$new->buffer = $pk->buffer;
 						$new->decode();
 						$this->client->handlePacket($this, $new);
-					}
-					elseif(PONG_DataPacket::$ID === $id){
+					}elseif(PONG_DataPacket::$ID === $id){
 						$new = new PONG_DataPacket();
 						$new->buffer = $pk->buffer;
 						$new->decode();
 						$this->client->handlePacket($this, $new);
-					}
-					else {
+					}else {
 						$new = StaticDataPacketPool::getPacket($pk->buffer);
 						$new->decode();
 						$this->client->handleDataPacket($this, $new);
 					}
 				}
-			}
-			else {
+			}else {
 				$this->client->handlePacket($this, $pk);
 			}
-		}
-		elseif($pk !== false){
+		}elseif($pk !== false){
 			print $pk . "\n";
 		}
 	}
@@ -189,5 +186,4 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 	public function setIsConnected($isConnected){
 		$this->isConnected = $isConnected;
 	}
-
 }
