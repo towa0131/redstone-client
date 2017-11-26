@@ -29,6 +29,7 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 	private $port;
 
 	private $name;
+	private $clientId;
 
 	private $sequenceNumber;
 	private $ackQueue;
@@ -38,7 +39,6 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 
 	public function __construct(MCPEClient $client, $ip, $port){
 		$this->socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-		//socket_set_option($this->socket, SOL_SOCKET, SO_BROADCAST, 1); //Allow sending broadcast messages
 		if(@socket_bind($this->socket, "0.0.0.0", ClientConnection::START_PORT + ClientConnection::$instanceId) === true){
 			socket_set_option($this->socket, SOL_SOCKET, SO_REUSEADDR, 0);
 			$this->setSendBuffer(1024 * 1024 * 8)->setRecvBuffer(1024 * 1024 * 8);
@@ -50,6 +50,8 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 		$this->ip = $ip;
 		$this->port = $port;
 		$this->name = "";
+		$this->clientId = mt_rand(1000, 9999);
+
 		$this->sequenceNumber = 0;
 		$this->ackQueue = [];
 		$this->isConnected = false;
@@ -58,21 +60,35 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 	}
 
 	/**
-	 * @return string
-	 */
+	   * @return string
+	   */
 	public function getName(){
 		return $this->name;
 	}
 
 	/**
-	 * @param string $name
-	 */
+	   * @param string $name
+	   */
 	public function setName($name){
 		$this->name = $name;
 	}
 
+	/**
+	   * @param int
+	   */
+	public function getClientId(){
+		return $this->clientId;
+	}
+
+	/**
+	   * @param int $id
+	   */
+	public function setClientId($clientId){
+		$this->clientId = $clientId;
+	}
+
 	public function sendPacket(Packet $packet){
-		print "[Send] " . get_class($packet) . PHP_EOL;
+		echo "[Send] " . get_class($packet) . PHP_EOL;
 		$this->lastSendTime = time();
 		$packet->encode();
 		return $this->writePacket($packet->buffer, $this->ip, $this->port);
@@ -80,7 +96,7 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 
 	public function sendEncapsulatedPacket($packet){
 		if($packet instanceof Packet || $packet instanceof PMDataPacket) {
-			print "[Send] " . get_class($packet) . PHP_EOL;
+			echo "[Send] " . get_class($packet) . PHP_EOL;
 			$packet->encode();
 			$encapsulated = new EncapsulatedPacket();
 			$encapsulated->reliability = 0;
@@ -124,7 +140,8 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 			$this->sendPacket($ack);
 			$this->ackQueue = [];
 		}
-		if(($pk = $this->receivePacket()) instanceof Packet){
+		$pk = $this->receivePacket();
+		if($pk instanceof Packet){
 			if($pk instanceof DataPacket){
 				foreach($pk->packets as $pk){
 					$id = ord($pk->buffer{0});
@@ -138,51 +155,51 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 						$new->buffer = $pk->buffer;
 						$new->decode();
 						$this->client->handlePacket($this, $new);
-					}else {
+					}else{
 						$new = StaticDataPacketPool::getPacket($pk->buffer);
 						$new->decode();
 						$this->client->handleDataPacket($this, $new);
 					}
 				}
-			}else {
+			}else{
 				$this->client->handlePacket($this, $pk);
 			}
 		}elseif($pk !== false){
-			print $pk . "\n";
+			echo $pk . PHP_EOL;
 		}
 	}
 
 	/**
-	 * @return MCPEClient
-	 */
+	   * @return MCPEClient
+	   */
 	public function getClient(){
 		return $this->client;
 	}
 
 	/**
-	 * @return int
-	 */
+	   * @return int
+	   */
 	public function getIp(){
 		return $this->ip;
 	}
 
 	/**
-	 * @return string
-	 */
+	   * @return string
+	   */
 	public function getPort(){
 		return $this->port;
 	}
 
 	/**
-	 * @return boolean
-	 */
+	   * @return boolean
+	   */
 	public function isConnected(){
 		return $this->isConnected;
 	}
 
 	/**
-	 * @param boolean $isConnected
-	 */
+	   * @param boolean $isConnected
+	   */
 	public function setIsConnected($isConnected){
 		$this->isConnected = $isConnected;
 	}

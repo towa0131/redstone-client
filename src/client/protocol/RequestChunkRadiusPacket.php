@@ -9,5 +9,5 @@ class RequestChunkRadiusPacket extends \pocketmine\network\mcpe\protocol\Request
 	public function encode(){
 		$this->putVarInt($this->radius);
 	}
-	
+
 }

@@ -6,9 +6,7 @@ use pocketmine\network\mcpe\protocol\UnknownPacket;
 use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\utils\Binary;
 use raklib\protocol\PONG_DataPacket;
-use client\protocol\FullChunkDataPacket;
 use client\protocol\LoginPacket;
-use client\protocol\LoginStatusPacket;
 
 class StaticDataPacketPool {
 	private static $packetPool = [];
