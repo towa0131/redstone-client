@@ -2,14 +2,17 @@
 
 namespace client\protocol;
 
-class LoginPacket extends \pocketmine\network\mcpe\protocol\LoginPacket{
+use pocketmine\network\mcpe\protocol\LoginPacket as PMLoginPacket;
+
+class LoginPacket extends PMLoginPacket{
 
 	public $protocol;
-	public $string;
+	public $chainData;
 
 	public function encode(){
 		parent::encode();
 		$this->putInt($this->protocol);
-		$this->putString($this->string);
+		$string = "";
+		$this->putString($string);
 	}
 }

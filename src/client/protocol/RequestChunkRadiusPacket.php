@@ -2,7 +2,9 @@
 
 namespace client\protocol;
 
-class RequestChunkRadiusPacket extends \pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket{
+use pocketmine\network\mcpe\protocol\RequestChunkRadiusPacket as PMRequestChunkRadiusPacket;
+
+class RequestChunkRadiusPacket extends PMRequestChunkRadiusPacket{
 
 	public $radius;
 

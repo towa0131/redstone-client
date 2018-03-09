@@ -3,7 +3,6 @@
 namespace client;
 
 use client\protocol\LoginPacket;
-use client\protocol\ResourcePackClientResponsePacket;
 use client\protocol\RequestChunkRadiusPacket;
 
 use pocketmine\network\mcpe\protocol\DataPacket;
