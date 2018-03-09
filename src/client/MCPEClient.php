@@ -75,7 +75,7 @@ class MCPEClient implements Tickable{
 			case OPEN_CONNECTION_REPLY_2::class:
 				echo "[MTU]" . $packet->mtuSize . PHP_EOL;
 				$pk = new CLIENT_CONNECT_DataPacket();
-				$pk->clientID = $connection->getClientId();;
+				$pk->clientID = $connection->getClientId();
 				$pk->sendPing = mt_rand(1,100);
 				$connection->sendEncapsulatedPacket($pk);
 				break;

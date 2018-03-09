@@ -1,1 +1,23 @@
-{ "name": "towa0131/RedStone-Client", "description": "Minecraft Bedrock Edition Client", "license": "proprietary", "autoload": { "psr-4": { "client\\": "src/client/", "raklib\\": "src/raklib/", "pocketmine\\": "src/pocketmine/", "pocketmine\\network\\mcpe\\protocol\\": "src/pocketmine/network/mcpe/protocol/"} }, "require": { "ext-gd": "*" }}
+{
+    "name": "towa0131/RedStone-Client",
+    "description": "Minecraft Bedrock Edition Client",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "towa0131",
+            "email": "towa.towa0131@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "client\\": "src/client/", 
+            "pocketmine\\": "src/pocketmine/", 
+            "pocketmine\\network\\mcpe\\protocol\\": "src/pocketmine/network/mcpe/protocol/", 
+            "raklib\\": "src/raklib/"
+        }
+    },
+    "require": {
+        "ext-gd": "*"
+    }
+}
