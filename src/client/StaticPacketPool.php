@@ -23,12 +23,12 @@ use raklib\protocol\NACK;
 use raklib\protocol\OPEN_CONNECTION_REPLY_1;
 use raklib\protocol\OPEN_CONNECTION_REPLY_2;
 use raklib\protocol\OPEN_CONNECTION_REQUEST_1;
+use raklib\protocol\OPEN_CONNECTION_REQUEST_2;
 use raklib\protocol\Packet;
 use raklib\protocol\UNCONNECTED_PING;
 use raklib\protocol\UNCONNECTED_PING_OPEN_CONNECTIONS;
 use raklib\protocol\UNCONNECTED_PONG;
 use raklib\protocol\CLIENT_DISCONNECT_DataPacket;
-use client\protocol\OPEN_CONNECTION_REQUEST_2;
 
 class StaticPacketPool{
     private static $packetPool = [];
