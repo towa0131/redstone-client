@@ -5,13 +5,16 @@ namespace client;
 use client\protocol\LoginPacket;
 use client\protocol\ResourcePackClientResponsePacket;
 use client\protocol\RequestChunkRadiusPacket;
+
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\PlayStatusPacket;
-use pocketmine\network\mcpe\protocol\MessagePacket;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\protocol\FullChunkDataPacket;
+
+use pocketmine\utils\Terminal;
+
 use raklib\protocol\CLIENT_HANDSHAKE_DataPacket;
 use raklib\protocol\CLIENT_CONNECT_DataPacket;
 use raklib\protocol\OPEN_CONNECTION_REPLY_1;
@@ -47,7 +50,7 @@ class MCPEClient implements Tickable{
 			case UNCONNECTED_PONG::class:
 				$rawData = $packet->serverName;
 				$data = explode(";", $rawData);
-				echo "[Motd]" . $data[1] . PHP_EOL;
+				echo "[Motd]" . Terminal::toANSI($data[1]) . PHP_EOL;
 				echo "[Protocol]" . $data[2] . PHP_EOL;
 				echo "[Version]" . $data[3] . PHP_EOL;
 				echo "[OnlinePlayers]" . $data[4] . PHP_EOL;
