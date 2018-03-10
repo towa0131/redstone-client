@@ -30,7 +30,8 @@ use raklib\protocol\UNCONNECTED_PING_OPEN_CONNECTIONS;
 use raklib\protocol\UNCONNECTED_PONG;
 use raklib\protocol\CLIENT_DISCONNECT_DataPacket;
 
-class StaticPacketPool{
+class StaticPacketPool {
+
     private static $packetPool = [];
     private static function registerPacket($id, $class){
         StaticPacketPool::$packetPool[$id] = new $class;

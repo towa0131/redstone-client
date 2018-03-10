@@ -11,6 +11,7 @@ use raklib\protocol\PONG_DataPacket;
 use client\protocol\LoginPacket;
 
 class StaticDataPacketPool {
+
 	private static $packetPool = [];
 
 	private static function registerPacket($class){
@@ -35,7 +36,7 @@ class StaticDataPacketPool {
 	}
 
 	private static function registerPackets(){
-		require_once "vendor/autoload.php";//composer autoloader
+		require_once "vendor/autoload.php"; //composer autoloader
 
 		StaticDataPacketPool::$packetPool = new \SplFixedArray(256);
 

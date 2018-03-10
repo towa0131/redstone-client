@@ -5,6 +5,8 @@ namespace client;
 use client\protocol\LoginPacket;
 use client\protocol\RequestChunkRadiusPacket;
 
+use client\utils\Address;
+
 use pocketmine\network\mcpe\protocol\DataPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\PlayStatusPacket;
@@ -39,8 +41,8 @@ class MCPEClient implements Tickable{
 		$this->connections = [];
 	}
 
-	public function addConnection($ip, $port){
-		$this->connections[] = new ClientConnection($this, $ip, $port);
+	public function addConnection(Address $address){
+		$this->connections[] = new ClientConnection($this, $address);
 	}
 
 	public function handlePacket(ClientConnection $connection, Packet $packet){
@@ -68,8 +70,8 @@ class MCPEClient implements Tickable{
 				echo "[Security]" . $packet->security . PHP_EOL;
 				echo "[MTU]" . $packet->mtuSize . PHP_EOL;
 				$pk = new OPEN_CONNECTION_REQUEST_2();
-				$pk->serverAddress = $connection->getIp();
-				$pk->serverPort = $connection->getPort();
+				$pk->serverAddress = $connection->getAddress()->getIp();
+				$pk->serverPort = $connection->getAddress()->getPort();
 				$pk->mtuSize = self::DEFAULT_MTU;
 				$pk->clientID =$connection->getClientId();
 				$connection->sendPacket($pk);
@@ -88,8 +90,8 @@ class MCPEClient implements Tickable{
 					$addresses[$i] = ["0.0.0.0", 0, 4];
 				}
 				$pk = new CLIENT_HANDSHAKE_DataPacket();
-				$pk->address = $connection->getIp();
-				$pk->port = $connection->getPort();
+				$pk->address = $connection->getAddress()->getIp();
+				$pk->port = $connection->getAddress()->getPort();
 				$pk->systemAddresses = $addresses;
 				$pk->sendPing = mt_rand(1,100);
 				$pk->sendPong = mt_rand(1,100);

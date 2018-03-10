@@ -11,8 +11,8 @@
     ],
     "autoload": {
         "psr-4": {
-            "client\\": "src/client/", 
-            "pocketmine\\": "src/pocketmine/", 
+            "client\\": "src/client/",
+            "pocketmine\\": "src/pocketmine/",
             "pocketmine\\network\\mcpe\\protocol\\": "src/pocketmine/network/mcpe/protocol/", 
             "raklib\\": "src/raklib/"
         }

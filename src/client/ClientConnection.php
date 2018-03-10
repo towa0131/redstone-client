@@ -3,6 +3,7 @@
 namespace client;
 
 use pocketmine\network\mcpe\protocol\DataPacket as PMDataPacket;
+
 use raklib\protocol\ACK;
 use raklib\protocol\DATA_PACKET_0;
 use raklib\protocol\DATA_PACKET_4;
@@ -13,7 +14,10 @@ use raklib\protocol\PONG_DataPacket;
 use raklib\protocol\SERVER_HANDSHAKE_DataPacket;
 use raklib\protocol\UNCONNECTED_PING;
 use raklib\server\UDPServerSocket;
+
 use client\Tickable;
+
+use client\utils\Address;
 
 class ClientConnection extends UDPServerSocket implements Tickable{
 
@@ -25,8 +29,8 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 
 	/** @var  MCPEClient */
 	private $client;
-	private $ip;
-	private $port;
+	/** @var  Address */
+	private $address;
 
 	private $name;
 	private $clientId;
@@ -37,7 +41,7 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 	private $lastSendTime;
 	private $pingCount;
 
-	public function __construct(MCPEClient $client, $ip, $port){
+	public function __construct(MCPEClient $client, Address $address){
 		$this->socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 		if(@socket_bind($this->socket, "0.0.0.0", ClientConnection::START_PORT + ClientConnection::$instanceId) === true){
 			socket_set_option($this->socket, SOL_SOCKET, SO_REUSEADDR, 0);
@@ -47,8 +51,7 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 		ClientConnection::$instanceId++;
 
 		$this->client = $client;
-		$this->ip = $ip;
-		$this->port = $port;
+		$this->address = $address;
 		$this->name = "";
 		$this->clientId = mt_rand(1000, 9999);
 
@@ -91,7 +94,7 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 		echo "[Send] " . get_class($packet) . PHP_EOL;
 		$this->lastSendTime = time();
 		$packet->encode();
-		return $this->writePacket($packet->buffer, $this->ip, $this->port);
+		return $this->writePacket($packet->buffer, $this->address->getIp(), $this->address->getPort());
 	}
 
 	public function sendEncapsulatedPacket($packet){
@@ -113,7 +116,7 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 	}
 
 	public function receivePacket(){
-		if ($this->readPacket($buffer, $this->ip, $this->port) > 0) {
+		if ($this->readPacket($buffer, $this->address->getIp(), $this->address->getPort()) > 0) {
 			if (($packet = StaticPacketPool::getPacketFromPool(ord($buffer{0}))) !== null) {
 				$packet->buffer = $buffer;
 				$packet->decode();
@@ -177,17 +180,10 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 	}
 
 	/**
-	   * @return int
+	   * @return Address
 	   */
-	public function getIp(){
-		return $this->ip;
-	}
-
-	/**
-	   * @return string
-	   */
-	public function getPort(){
-		return $this->port;
+	public function getAddress(){
+		return $this->address;
 	}
 
 	/**

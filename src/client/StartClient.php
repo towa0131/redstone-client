@@ -2,19 +2,20 @@
 
 namespace client {
 
+	use client\utils\Address;
 	require_once "vendor/autoload.php";
 
 	echo "Name : ";
 	$name = trim(fgets(STDIN));
 
-	echo "ServerIP : ";
+	echo "Server IP : ";
 	$ip = trim(fgets(STDIN));
 
 	echo "Server Port : ";
-	$port = trim(fgets(STDIN));
+	$port = (int)trim(fgets(STDIN));
 
 	$client = new MCPEClient($name);
-	$client->addConnection($ip, (int)$port);
+	$client->addConnection(new Address($ip, $port));
 
 	while(true){
 		$client->tick();
