@@ -7,12 +7,14 @@ use client\protocol\RequestChunkRadiusPacket;
 
 use client\utils\Address;
 
+use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\DataPacket;
+use pocketmine\network\mcpe\protocol\DisconnectPacket;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\network\mcpe\protocol\PlayStatusPacket;
 use pocketmine\network\mcpe\protocol\StartGamePacket;
 use pocketmine\network\mcpe\protocol\ProtocolInfo;
-use pocketmine\network\protocol\FullChunkDataPacket;
+use pocketmine\network\mcpe\protocol\FullChunkDataPacket;
 
 use pocketmine\utils\Terminal;
 
@@ -46,7 +48,7 @@ class MCPEClient implements Tickable{
 	}
 
 	public function handlePacket(ClientConnection $connection, Packet $packet){
-		echo "[Receive] " . get_class($packet) . PHP_EOL;
+		echo "[Receive]" . get_class($packet) . PHP_EOL;
 		switch(get_class($packet)){
 			case UNCONNECTED_PONG::class:
 				$rawData = $packet->serverName;
@@ -96,12 +98,27 @@ class MCPEClient implements Tickable{
 				$pk->sendPing = mt_rand(1,100);
 				$pk->sendPong = mt_rand(1,100);
 				$connection->sendEncapsulatedPacket($pk);
-/*
+
 				$pk = new LoginPacket();
 				$pk->protocol = ProtocolInfo::CURRENT_PROTOCOL;
-				$pk->string = "eyJ4NXUiOiJNSFl3RUFZSEtvWkl6ajBDQVFZRks0RUVBQ0lEWWdBRThFTGtpeHlMY3dsWnJ5VVFjdTFUdlBPbUkyQjd2WDgzbmRuV1JVYVhtNzR3RmZhNWZcL2x3UU5UZnJMVkhhMlBtZW5wR0k2SmhJTVVKYVdacmptTWo5ME5vS05GU05CdUtkbThyWWlYc2ZhejNLMzZ4XC8xVTI2SHBHMFp4S1wvVjFWIn0.W10.QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFB";
-				$connection->sendEncapsulatedPacket($pk);
+				$pk->chainData = ["extraData" => [
+									"displayName" => $this->name,
+									"identity" => "RedStone-Client",
+									"XUID" => "12345",
+									"identityPublicKey" => "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V"
+				]];
+				$pk->clientData = ["ClientRandomId" => "123456789",
+									"ServerAddress" => "127.0.0.1",
+									"DeviceModel" => "",
+									"DeviceOS" => "",
+									"SkinGeometryName" => "",
+									"SkinGeometry" => ""
+				];
 
+				$pk = $connection->compressBatch($pk);
+				
+				$connection->sendEncapsulatedPacket($pk, 2);
+/*
 				$pk = new RequestChunkRadiusPacket();
 				$pk->radius = 8;
 				$connection->sendEncapsulatedPacket($pk);
@@ -115,7 +132,7 @@ class MCPEClient implements Tickable{
 		}
 	}
 	public function handleDataPacket(ClientConnection $connection, DataPacket $pk){
-		echo "[Receive] " . get_class($pk) . PHP_EOL;
+		echo "[Receive]" . get_class($pk) . PHP_EOL;
 		switch(get_class($pk)){
 			case PlayStatusPacket::class:
 				echo "[PlayStatusPacket]" . $pk->status . PHP_EOL;
@@ -127,6 +144,9 @@ class MCPEClient implements Tickable{
 				//echo $pk->chunkX . " " . $pk->chunkZ . PHP_EOL;
 				break;
 			case UpdateBlockPacket::class:
+				break;
+			case DisconnectPacket::class:
+				echo "[DisconnectPacket]" . $pk->message . PHP_EOL;
 				break;
 		}
 	}
