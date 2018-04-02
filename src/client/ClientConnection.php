@@ -184,9 +184,8 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 								$packet = StaticDataPacketPool::getPacketFromPool(ord($buf{0}));
 								$packet->setBuffer($buf, 0);
 								$packet->decode();
+								$this->client->handleDataPacket($this, $packet);
 							}
-
-							$this->client->handleDataPacket($this, $packet);
 						}
 					}
 				}
