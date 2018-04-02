@@ -42,8 +42,10 @@ class StaticPacketPool {
      *
      * @return Packet
      */
-    static public function getPacketFromPool($id){
-        if(empty(StaticPacketPool::$packetPool)) StaticPacketPool::registerPackets();
+    public static function getPacketFromPool($id){
+        if(empty(StaticPacketPool::$packetPool)){
+        	StaticPacketPool::registerPackets();
+        }
         if(isset(StaticPacketPool::$packetPool[$id])){
             return clone StaticPacketPool::$packetPool[$id];
         }
@@ -78,5 +80,14 @@ class StaticPacketPool {
         StaticPacketPool::registerPacket(DATA_PACKET_F::$ID, DATA_PACKET_F::class);
         StaticPacketPool::registerPacket(NACK::$ID, NACK::class);
         StaticPacketPool::registerPacket(ACK::$ID, ACK::class);
+    }
+
+    public static function getPacket($buffer){
+        $pid = ord($buffer{0});
+        $data = StaticPacketPool::getPacketFromPool($pid);
+        if($data === null){
+        	return null;
+        }
+        return $data;
     }
 }
