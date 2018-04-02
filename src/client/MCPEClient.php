@@ -51,6 +51,8 @@ class MCPEClient implements Tickable{
 		echo "[Receive]" . get_class($packet) . PHP_EOL;
 		switch(get_class($packet)){
 			case UNCONNECTED_PONG::class:
+				$connection->setStatus(ClientConnection::STATUS_CONNECTED);
+				echo "[Status]Connected to server." . PHP_EOL;
 				$rawData = $packet->serverName;
 				$data = explode(";", $rawData);
 				echo "[Motd]" . Terminal::toANSI($data[1]) . PHP_EOL;
@@ -62,7 +64,6 @@ class MCPEClient implements Tickable{
 				echo "[ServerName]" . $data[7] . PHP_EOL;
 				echo "[Gamemode]" . $data[8] . PHP_EOL;
 				$connection->setName($rawData);
-				$connection->setIsConnected(true);
 				$pk = new OPEN_CONNECTION_REQUEST_1();
 				$pk->mtuSize = self::DEFAULT_MTU;
 				$connection->sendPacket($pk);

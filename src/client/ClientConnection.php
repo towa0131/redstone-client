@@ -9,6 +9,7 @@ use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\utils\BinaryStream;
 
 use raklib\protocol\ACK;
+use raklib\protocol\CLIENT_DISCONNECT_DataPacket;
 use raklib\protocol\DATA_PACKET_0;
 use raklib\protocol\DATA_PACKET_4;
 use raklib\protocol\DataPacket;
@@ -27,9 +28,12 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 
 	const START_PORT = 49666;
 
-	private static $instanceId = 0;
+	const STATUS_NONE = 0;
+	const STATUS_CONNECTED = 1;
+	const STATUS_JOINED = 2;
+	const STATUS_DISCONNECTED = 3;
 
-	private $isConnected;
+	private static $instanceId = 0;
 
 	/** @var  MCPEClient */
 	private $client;
@@ -44,6 +48,8 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 
 	private $lastSendTime;
 	private $pingCount;
+
+	private $status;
 
 	public function __construct(MCPEClient $client, Address $address){
 		$this->socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
@@ -61,9 +67,10 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 
 		$this->sequenceNumber = 0;
 		$this->ackQueue = [];
-		$this->isConnected = false;
 		$this->lastSendTime = -1;
 		$this->pingCount = 0;
+
+		$this->status = ClientConnection::STATUS_NONE;
 	}
 
 	/**
@@ -144,7 +151,7 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 	}
 
 	public function tick(){
-		if(!$this->isConnected() && $this->lastSendTime !== time()){
+		if($this->getStatus() === ClientConnection::STATUS_NONE && $this->lastSendTime !== time()){
 			$ping = new UNCONNECTED_PING();
 			$ping->pingID = $this->pingCount++;
 			$this->sendPacket($ping);
@@ -170,6 +177,11 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 						$new->buffer = $pk->buffer;
 						$new->decode();
 						$this->client->handlePacket($this, $new);
+					}elseif(CLIENT_DISCONNECT_DataPacket::$ID === $id){
+						$this->setStatus(ClientConnection::STATUS_DISCONNECTED);
+						echo "[Status]Disconnected from server." . PHP_EOL;
+						echo "Thanks for using!" . PHP_EOL;
+						exit(0);
 					}else{
 						$data = StaticPacketPool::getPacket($pk->buffer);
 						if($data !== null){
@@ -212,16 +224,16 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 	}
 
 	/**
-	   * @return boolean
+	   * @param int $status
 	   */
-	public function isConnected(){
-		return $this->isConnected;
+	public function setStatus($status){
+		$this->status = $status;
 	}
 
 	/**
-	   * @param boolean $isConnected
+	   * @return int
 	   */
-	public function setIsConnected($isConnected){
-		$this->isConnected = $isConnected;
+	public function getStatus(){
+		return $this->status;
 	}
 }
