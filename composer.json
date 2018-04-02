@@ -16,8 +16,5 @@
             "pocketmine\\network\\mcpe\\protocol\\": "src/pocketmine/network/mcpe/protocol/", 
             "raklib\\": "src/raklib/"
         }
-    },
-    "require": {
-        "ext-gd": "*"
     }
 }
