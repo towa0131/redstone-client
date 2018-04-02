@@ -25,7 +25,9 @@ class StaticDataPacketPool {
 	 * @return DataPacket
 	 */
 	public static function getPacketFromPool($id){
-		if(empty(StaticDataPacketPool::$packetPool)) StaticDataPacketPool::registerPackets();
+		if(empty(StaticDataPacketPool::$packetPool)){
+			StaticDataPacketPool::registerPackets();
+		}
 
 		/** @var DataPacket $class */
 		$class = StaticDataPacketPool::$packetPool[$id];
@@ -145,16 +147,15 @@ class StaticDataPacketPool {
 		StaticDataPacketPool::registerPacket(\pocketmine\network\mcpe\protocol\ServerSettingsResponsePacket::class);
 		StaticDataPacketPool::registerPacket(\pocketmine\network\mcpe\protocol\ShowProfilePacket::class);
 		StaticDataPacketPool::registerPacket(\pocketmine\network\mcpe\protocol\SetDefaultGameTypePacket::class);
-		//StaticDataPacketPool::registerPacket(\pocketmine\network\mcpe\protocol\BatchPacket::class);
+		StaticDataPacketPool::registerPacket(\pocketmine\network\mcpe\protocol\BatchPacket::class);
 	}
 
 	public static function getPacket($buffer){
 		$pid = ord($buffer{0});
-		if(($data = StaticDataPacketPool::getPacketFromPool($pid)) === null){
-			$data = new UnknownPacket();
-			$data->payload = $buffer;
+		$data = StaticDataPacketPool::getPacketFromPool($pid);
+		if($data === null){
+			$data = new BatchPacket($buffer);
 		}
-		$data->setBuffer(substr($buffer, 1));
 
 		return $data;
 	}

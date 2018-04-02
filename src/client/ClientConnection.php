@@ -2,7 +2,11 @@
 
 namespace client;
 
+use pocketmine\network\mcpe\protocol\BatchPacket;
 use pocketmine\network\mcpe\protocol\DataPacket as PMDataPacket;
+use pocketmine\network\mcpe\protocol\PacketPool;
+
+use pocketmine\utils\BinaryStream;
 
 use raklib\protocol\ACK;
 use raklib\protocol\DATA_PACKET_0;
@@ -91,17 +95,18 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 	}
 
 	public function sendPacket(Packet $packet){
-		echo "[Send] " . get_class($packet) . PHP_EOL;
+		echo "[Send]" . get_class($packet) . PHP_EOL;
 		$this->lastSendTime = time();
 		$packet->encode();
 		return $this->writePacket($packet->buffer, $this->address->getIp(), $this->address->getPort());
 	}
 
-	public function sendEncapsulatedPacket($packet){
+	public function sendEncapsulatedPacket($packet, $messageIndex = null){
 		if($packet instanceof Packet || $packet instanceof PMDataPacket) {
-			echo "[Send] " . get_class($packet) . PHP_EOL;
+			echo "[Send]" . get_class($packet) . PHP_EOL;
 			$packet->encode();
 			$encapsulated = new EncapsulatedPacket();
+			$encapsulated->messageIndex = $messageIndex;
 			$encapsulated->reliability = 0;
 			$encapsulated->buffer = $packet->buffer;
 
@@ -113,6 +118,13 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 		}else{
 			return false;
 		}
+	}
+
+	public function compressBatch($packet){
+		$pk = new BatchPacket();
+		$pk->addPacket($packet);
+		echo "[Compress]" . get_class($packet) . PHP_EOL;
+		return $pk;	
 	}
 
 	public function receivePacket(){
@@ -159,9 +171,23 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 						$new->decode();
 						$this->client->handlePacket($this, $new);
 					}else{
-						$new = StaticDataPacketPool::getPacket($pk->buffer);
-						$new->decode();
-						$this->client->handleDataPacket($this, $new);
+						$data = StaticPacketPool::getPacket($pk->buffer);
+						if($data !== null){
+							echo "[Receive]" . get_class($data) . PHP_EOL;
+						}else{
+							$new = new BatchPacket();
+							$new->setBuffer($pk->buffer, 0);
+							$new->payload = $pk->buffer;
+							$new->decode();
+							$packets = $new->getPackets();
+							foreach($packets as $buf){
+								$packet = StaticDataPacketPool::getPacketFromPool(ord($buf{0}));
+								$packet->setBuffer($buf, 0);
+								$packet->decode();
+							}
+
+							$this->client->handleDataPacket($this, $packet);
+						}
 					}
 				}
 			}else{
