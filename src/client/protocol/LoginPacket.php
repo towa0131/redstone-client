@@ -18,18 +18,19 @@ class LoginPacket extends PMLoginPacket{
 		parent::encode();
 		$this->putInt($this->protocol);
 		$bin = new BinaryStream();
-		$webToken = $this->encodeJWT(json_encode($this->chainData));
+		$webToken = $this->encodeJWT($this->chainData);
 		$chainData = json_encode(["chain" => [$webToken, $webToken, $webToken]]);
 		$bin->putLInt(strlen($chainData));
 		$bin->put($chainData);
-		$clientData = $this->encodeJWT(json_encode($this->clientData));
+		$clientData = $this->encodeJWT($this->clientData);
 		$bin->putLInt(strlen($clientData));
 		$bin->put($clientData);
 		$this->putString($bin->getBuffer());
 	}
 
-	private function encodeJWT(string $jwt){
-		//TODO
-		return base64_encode(json_encode($this->header)) . "." . base64_encode($jwt) . ".none";
+	private function encodeJWT(array $payload){
+		require_once "vendor/autoload.php"; //load module
+
+		return base64_encode(json_encode($this->header)) . "." . base64_encode(json_encode($payload)) . ".none";
 	}
 }

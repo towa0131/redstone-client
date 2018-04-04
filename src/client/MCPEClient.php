@@ -111,21 +111,23 @@ class MCPEClient implements Tickable{
 				$pk->chainData = ["extraData" => [
 									"displayName" => $this->name,
 									"identity" => $uuid->toString(),
-									"XUID" => "12345",
-									"identityPublicKey" => "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V"
-				]];
+									"XUID" => mt_rand(1000000000000000, 9999999999999999)
+									],
+									"identityPublicKey" => "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE7nnZpCfxmCrSwDdBv7eBXXMtKhroxOriEr3hmMOJAuw/ZpQXj1K5GGtHS4CpFNttd1JYAKYoJxYgaykpie0EyAv3qiK6utIH2qnOAt3VNrQYXfIZJS/VRe3Il8Pgu9CB"
+				];
 				$pk->clientData = ["ClientRandomId" =>"123456789",
 									"ServerAddress" => "127.0.0.1",
 									"DeviceModel" => "",
-									"DeviceOS" => "",
-									"SkinId" => "123456789",
+									"DeviceOS" => 1,
+									"SkinId" => "Standard_Custom",
 									"SkinData" => base64_encode($skin),
 									"SkinGeometryName" => "",
 									"SkinGeometry" => "",
-									"UIProfile" => "Classic",
-									"LanguageCode" => "unknown",
-									"GameVersion" => "GameVersion",
-									"CapeData" => ""
+									"UIProfile" => 1,
+									"LanguageCode" => "en_US",
+									"GameVersion" => "1.1.0.4",
+									"CapeData" => "",
+									"GuiScale" => 0
 									
 				];
 				$pk->header = ["alg" => "ES384",

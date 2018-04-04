@@ -1,5 +1,5 @@
 {
-    "name": "towa0131/RedStone-Client",
+    "name": "towa0131/redstone-client",
     "description": "Minecraft Bedrock Edition Client",
     "license": "proprietary",
     "authors": [
@@ -16,5 +16,8 @@
             "pocketmine\\network\\mcpe\\protocol\\": "src/pocketmine/network/mcpe/protocol/", 
             "raklib\\": "src/raklib/"
         }
+    },
+    "require": {
+        "spomky-labs/jose": "^7.0"
     }
 }
