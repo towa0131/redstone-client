@@ -30,8 +30,10 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 
 	const STATUS_NONE = 0;
 	const STATUS_CONNECTED = 1;
-	const STATUS_JOINED = 2;
-	const STATUS_DISCONNECTED = 3;
+	const STATUS_CONNECTED_RAKNET = 2;
+	const STATUS_LOGINED =3;
+	const STATUS_JOINED = 4;
+	const STATUS_DISCONNECTED = 5;
 
 	private static $instanceId = 0;
 
@@ -187,16 +189,18 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 						if($data !== null){
 							echo "[Receive]" . get_class($data) . PHP_EOL;
 						}else{
-							$new = new BatchPacket();
-							$new->setBuffer($pk->buffer, 0);
-							$new->payload = $pk->buffer;
-							$new->decode();
-							$packets = $new->getPackets();
-							foreach($packets as $buf){
-								$packet = StaticDataPacketPool::getPacketFromPool(ord($buf{0}));
-								$packet->setBuffer($buf, 0);
-								$packet->decode();
-								$this->client->handleDataPacket($this, $packet);
+							if($this->getStatus() >= ClientConnection::STATUS_CONNECTED_RAKNET){
+								$new = new BatchPacket();
+								$new->setBuffer($pk->buffer, 0);
+								$new->payload = $pk->buffer;
+								$new->decode();
+								$packets = $new->getPackets();
+								foreach($packets as $buf){
+									$packet = StaticDataPacketPool::getPacketFromPool(ord($buf{0}));
+									$packet->setBuffer($buf, 0);
+									$packet->decode();
+									$this->client->handleDataPacket($this, $packet);
+								}
 							}
 						}
 					}

@@ -17,6 +17,7 @@ use pocketmine\network\mcpe\protocol\ProtocolInfo;
 use pocketmine\network\mcpe\protocol\FullChunkDataPacket;
 
 use pocketmine\utils\Terminal;
+use pocketmine\utils\UUID;
 
 use raklib\protocol\CLIENT_HANDSHAKE_DataPacket;
 use raklib\protocol\CLIENT_CONNECT_DataPacket;
@@ -100,25 +101,43 @@ class MCPEClient implements Tickable{
 				$pk->sendPong = mt_rand(1,100);
 				$connection->sendEncapsulatedPacket($pk);
 
+				$connection->setStatus(ClientConnection::STATUS_CONNECTED_RAKNET);
+
+				$uuid = UUID::fromRandom();
+				$skin = zlib_decode(file_get_contents(__DIR__ . "/skin/skin.dat"));
+
 				$pk = new LoginPacket();
 				$pk->protocol = ProtocolInfo::CURRENT_PROTOCOL;
 				$pk->chainData = ["extraData" => [
 									"displayName" => $this->name,
-									"identity" => "RedStone-Client",
+									"identity" => $uuid->toString(),
 									"XUID" => "12345",
 									"identityPublicKey" => "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V"
 				]];
-				$pk->clientData = ["ClientRandomId" => "123456789",
+				$pk->clientData = ["ClientRandomId" =>"123456789",
 									"ServerAddress" => "127.0.0.1",
 									"DeviceModel" => "",
 									"DeviceOS" => "",
+									"SkinId" => "123456789",
+									"SkinData" => base64_encode($skin),
 									"SkinGeometryName" => "",
-									"SkinGeometry" => ""
+									"SkinGeometry" => "",
+									"UIProfile" => "Classic",
+									"LanguageCode" => "unknown",
+									"GameVersion" => "GameVersion",
+									"CapeData" => ""
+									
+				];
+				$pk->header = ["alg" => "ES384",
+								"x5u" => "MHYwEAYHKoZIzj0CAQYFK4EEACIDYgAE8ELkixyLcwlZryUQcu1TvPOmI2B7vX83ndnWRUaXm74wFfa5f/lwQNTfrLVHa2PmenpGI6JhIMUJaWZrjmMj90NoKNFSNBuKdm8rYiXsfaz3K36x/1U26HpG0ZxK/V1V"
 				];
 
 				$pk = $connection->compressBatch($pk);
 				
 				$connection->sendEncapsulatedPacket($pk, 2);
+
+				$connection->setStatus(ClientConnection::STATUS_LOGINED);
+
 /*
 				$pk = new RequestChunkRadiusPacket();
 				$pk->radius = 8;
