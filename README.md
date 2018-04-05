@@ -1,5 +1,5 @@
 ## What is RedStone-Client?
-**RedStone-Client** is Minecraft: Bedrock Edition Bot.
+**RedStone-Client** is Minecraft: Bedrock Edition Packet Analyze Tool.
 
 ## How to use?
 - Download from github to local.
@@ -32,14 +32,14 @@ Server Port : 19132
 PACKET SEND/RECEIVE ONLY.**
 
 ## Finished & Plan
- - [] Configuration File
- - [] Supported Server Software
-   - [] PMMP
-   - [] Nukkit
-   - [] Vanilla
- - [] World restore from FullChunkDataPacket
- - [] Plugin
- - [] Events
+ - [ ] Configuration File
+ - [ ] Supported Server Software
+   - [ ] PMMP
+   - [ ] Nukkit
+   - [ ] Vanilla
+ - [ ] World restore from FullChunkDataPacket
+ - [ ] Plugin
+ - [ ] Events
  - [x] RakNet Packet Send/Receive
  - [x] MCBE Packet Send/Receive
 
