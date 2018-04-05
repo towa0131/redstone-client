@@ -31,8 +31,22 @@ Server Port : 19132
 **THIS TOOL IS UNDER DEVELOPMENT. SO YOU CANNOT JOIN THE SERVER.
 PACKET SEND/RECEIVE ONLY.**
 
+## Finished & Plan
+ - [] Configuration File
+ - [] Supported Server Software
+   - [] PMMP
+   - [] Nukkit
+   - [] Vanilla
+ - [] World restore from FullChunkDataPacket
+ - [] Plugin
+ - [] Events
+ - [x] RakNet Packet Send/Receive
+ - [x] MCBE Packet Send/Receive
+
+**and more...**
+
 ## Reporting bugs
-Please report bugs to [issues](https://github.com/towa0131/RedStone-Client/issues/new) or [developer's twitter](https://twitter.com/towa_towa0131)
+Please report bugs to [issues](https://github.com/towa0131/RedStone-Client/issues/new) or [twitter](https://twitter.com/towa_towa0131)
 
 ## License
 See the LICENSE file for licensing information. [MIT LICENSE](https://opensource.org/licenses/MIT) will be applied to this software.
