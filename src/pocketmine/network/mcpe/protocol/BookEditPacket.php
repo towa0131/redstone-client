@@ -46,14 +46,16 @@ class BookEditPacket extends DataPacket{
 	public $secondaryPageNumber;
 
 	/** @var string */
-	public $content1;
+	public $text;
 	/** @var string */
-	public $content2;
+	public $photoName;
 
 	/** @var string */
 	public $title;
 	/** @var string */
 	public $author;
+	/** @var string */
+	public $xuid;
 
 	protected function decodePayload(){
 		$this->type = $this->getByte();
@@ -63,8 +65,8 @@ class BookEditPacket extends DataPacket{
 			case self::TYPE_REPLACE_PAGE:
 			case self::TYPE_ADD_PAGE:
 				$this->pageNumber = $this->getByte();
-				$this->content1 = $this->getString();
-				$this->content2 = $this->getString();
+				$this->text = $this->getString();
+				$this->photoName = $this->getString();
 				break;
 			case self::TYPE_DELETE_PAGE:
 				$this->pageNumber = $this->getByte();
@@ -76,6 +78,7 @@ class BookEditPacket extends DataPacket{
 			case self::TYPE_SIGN_BOOK:
 				$this->title = $this->getString();
 				$this->author = $this->getString();
+				$this->xuid = $this->getString();
 				break;
 			default:
 				throw new \UnexpectedValueException("Unknown book edit type $this->type!");
@@ -90,8 +93,8 @@ class BookEditPacket extends DataPacket{
 			case self::TYPE_REPLACE_PAGE:
 			case self::TYPE_ADD_PAGE:
 				$this->putByte($this->pageNumber);
-				$this->putString($this->content1);
-				$this->putString($this->content2);
+				$this->putString($this->text);
+				$this->putString($this->photoName);
 				break;
 			case self::TYPE_DELETE_PAGE:
 				$this->putByte($this->pageNumber);
@@ -103,6 +106,7 @@ class BookEditPacket extends DataPacket{
 			case self::TYPE_SIGN_BOOK:
 				$this->putString($this->title);
 				$this->putString($this->author);
+				$this->putString($this->xuid);
 				break;
 			default:
 				throw new \UnexpectedValueException("Unknown book edit type $this->type!");

@@ -44,6 +44,8 @@ class AddItemEntityPacket extends DataPacket{
 	public $motion;
 	/** @var array */
 	public $metadata = [];
+	/** @var bool */
+	public $isFromFishing = false;
 
 	protected function decodePayload(){
 		$this->entityUniqueId = $this->getEntityUniqueId();
@@ -52,16 +54,17 @@ class AddItemEntityPacket extends DataPacket{
 		$this->position = $this->getVector3Obj();
 		$this->motion = $this->getVector3Obj();
 		$this->metadata = $this->getEntityMetadata();
+		$this->isFromFishing = $this->getBool();
 	}
 
 	protected function encodePayload(){
-		if(isset($this->x)) $this->position = new Vector3($this->x, $this->y, $this->z);
 		$this->putEntityUniqueId($this->entityUniqueId ?? $this->entityRuntimeId);
 		$this->putEntityRuntimeId($this->entityRuntimeId);
 		$this->putSlot($this->item);
 		$this->putVector3Obj($this->position);
 		$this->putVector3ObjNullable($this->motion);
 		$this->putEntityMetadata($this->metadata);
+		$this->putBool($this->isFromFishing);
 	}
 
 	public function handle(NetworkSession $session) : bool{

@@ -26,6 +26,7 @@ namespace pocketmine\network\mcpe\protocol;
 #include <rules/DataPacket.h>
 
 
+use pocketmine\entity\Skin;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\PlayerListEntry;
 
@@ -55,12 +56,24 @@ class PlayerListPacket extends DataPacket{
 				$entry->uuid = $this->getUUID();
 				$entry->entityUniqueId = $this->getEntityUniqueId();
 				$entry->username = $this->getString();
-				$entry->skinId = $this->getString();
-				$entry->skinData = $this->getString();
-				$entry->capeData = $this->getString();
-				$entry->geometryModel = $this->getString();
-				$entry->geometryData = $this->getString();
-				$entry->xboxUserId = $this->getString();
+				$entry->thirdPartyName = $this->getString();
+				$entry->platform = $this->getVarInt();
+
+				$skinId = $this->getString();
+				$skinData = $this->getString();
+				$capeData = $this->getString();
+				$geometryName = $this->getString();
+				$geometryData = $this->getString();
+
+				$entry->skin = new Skin(
+					$skinId,
+					$skinData,
+					$capeData,
+					$geometryName,
+					$geometryData
+  				);
+  				$entry->xboxUserId = $this->getString();
+				$this->getString(); //unknown
 			}else{
 				$entry->uuid = $this->getUUID();
 			}
@@ -77,12 +90,15 @@ class PlayerListPacket extends DataPacket{
 				$this->putUUID($entry->uuid);
 				$this->putEntityUniqueId($entry->entityUniqueId);
 				$this->putString($entry->username);
-				$this->putString($entry->skinId);
-				$this->putString($entry->skinData);
-				$this->putString($entry->capeData);
-				$this->putString($entry->geometryModel);
-				$this->putString($entry->geometryData);
+				$this->putString($entry->thirdPartyName);
+				$this->putVarInt($entry->platform);
+				$this->putString($entry->skin->getSkinId());
+				$this->putString($entry->skin->getSkinData());
+				$this->putString($entry->skin->getCapeData());
+				$this->putString($entry->skin->getGeometryName());
+				$this->putString($entry->skin->getGeometryData());
 				$this->putString($entry->xboxUserId);
+				$this->putString("");
 			}else{
 				$this->putUUID($entry->uuid);
 			}

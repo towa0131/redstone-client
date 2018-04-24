@@ -28,26 +28,12 @@ namespace pocketmine\network\mcpe\protocol;
  */
 interface ProtocolInfo{
 
-	/**
-	 * NOTE TO DEVELOPERS
-	 * Do not waste your time or ours submitting pull requests changing game and/or protocol version numbers.
-	 * Pull requests changing game and/or protocol version numbers will be closed.
-	 *
-	 * This file is generated automatically, do not edit it manually.
-	 */
+	const CURRENT_PROTOCOL = 223;
+	const MULTI_PROTOCOLS = [220, 222, 223];
 
-	/**
-	 * Actual Minecraft: PE protocol version
-	 */
-	const CURRENT_PROTOCOL = 201;
-	/**
-	 * Current Minecraft PE version reported by the server. This is usually the earliest currently supported version.
-	 */
-	const MINECRAFT_VERSION = 'v1.2.10';
-	/**
-	 * Version number sent to clients in ping responses.
-	 */
-	const MINECRAFT_VERSION_NETWORK = '1.2.1';
+	const MINECRAFT_VERSION = "v1.2.15";
+
+	const MINECRAFT_VERSION_NETWORK = "1.2.15";
 
 	const LOGIN_PACKET = 0x01;
 	const PLAY_STATUS_PACKET = 0x02;
@@ -154,5 +140,5 @@ interface ProtocolInfo{
 	const SERVER_SETTINGS_RESPONSE_PACKET = 0x67;
 	const SHOW_PROFILE_PACKET = 0x68;
 	const SET_DEFAULT_GAME_TYPE_PACKET = 0x69;
-
+	const PING_PACKET = 0x04;
 }
