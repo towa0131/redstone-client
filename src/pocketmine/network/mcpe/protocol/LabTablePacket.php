@@ -25,54 +25,37 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
-
 use pocketmine\network\mcpe\NetworkSession;
 
-class UpdateBlockPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::UPDATE_BLOCK_PACKET;
+class LabTablePacket extends DataPacket{
+	public const NETWORK_ID = ProtocolInfo::LAB_TABLE_PACKET;
 
-	const FLAG_NONE      = 0b0000;
-	const FLAG_NEIGHBORS = 0b0001;
-	const FLAG_NETWORK   = 0b0010;
-	const FLAG_NOGRAPHIC = 0b0100;
-	const FLAG_PRIORITY  = 0b1000;
-
-	const FLAG_ALL = self::FLAG_NEIGHBORS | self::FLAG_NETWORK;
-	const FLAG_ALL_PRIORITY = self::FLAG_ALL | self::FLAG_PRIORITY;
-	
-	const DATA_LAYER_NORMAL = 0;
-	const DATA_LAYER_LIQUID = 1;
+	/** @var int */
+	public $uselessByte; //0 for client -> server, 1 for server -> client. Seems useless.
 
 	/** @var int */
 	public $x;
 	/** @var int */
-	public $z;
-	/** @var int */
 	public $y;
 	/** @var int */
-	public $blockRuntimeId;
+	public $z;
+
 	/** @var int */
-	public $flags;
-	
-	public $dataLayerId = self::DATA_LAYER_NORMAL;
+	public $reactionType;
 
 	protected function decodePayload(){
-		$this->getBlockPosition($this->x, $this->y, $this->z);
-		$this->blockRuntimeId = $this->getUnsignedVarInt();
-		$this->flags = $this->getUnsignedVarInt();
-		$this->dataLayerId = $this->getUnsignedVarInt();
+		$this->uselessByte = $this->getByte();
+		$this->getSignedBlockPosition($this->x, $this->y, $this->z);
+		$this->reactionType = $this->getByte();
 	}
 
 	protected function encodePayload(){
-		$this->putBlockPosition($this->x, $this->y, $this->z);
-		$this->putUnsignedVarInt($this->blockRuntimeId);
-		$this->putUnsignedVarInt($this->flags);
-		$this->putUnsignedVarInt($this->dataLayerId);
-	
+		$this->putByte($this->uselessByte);
+		$this->putSignedBlockPosition($this->x, $this->y, $this->z);
+		$this->putByte($this->reactionType);
 	}
 
 	public function handle(NetworkSession $session) : bool{
-		return $session->handleUpdateBlock($this);
+		return $session->handleLabTable($this);
 	}
-
 }

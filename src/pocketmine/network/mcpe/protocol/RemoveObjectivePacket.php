@@ -25,52 +25,23 @@ namespace pocketmine\network\mcpe\protocol;
 
 #include <rules/DataPacket.h>
 
-
 use pocketmine\network\mcpe\NetworkSession;
 
-class PlayStatusPacket extends DataPacket{
-	const NETWORK_ID = ProtocolInfo::PLAY_STATUS_PACKET;
+class RemoveObjectivePacket extends DataPacket{
+	public const NETWORK_ID = ProtocolInfo::REMOVE_OBJECTIVE_PACKET;
 
-	const LOGIN_SUCCESS = 0;
-	const LOGIN_FAILED_CLIENT = 1;
-	const LOGIN_FAILED_SERVER = 2;
-	const PLAYER_SPAWN = 3;
-	const LOGIN_FAILED_INVALID_TENANT = 4;
-	const LOGIN_FAILED_VANILLA_EDU = 5;
-	const LOGIN_FAILED_EDU_VANILLA = 6;
-	const LOGIN_FAILED_SERVER_FULL = 7;
-
-	/** @var int */
-	public $status;
-
-	/**
-	 * @var int
-	 * Used to determine how to write the packet when we disconnect incompatible clients.
-	 */
-	public $protocol;
+	/** @var string */
+	public $objectiveName;
 
 	protected function decodePayload(){
-		$this->status = $this->getInt();
-	}
-
-	public function canBeSentBeforeLogin() : bool{
-		return true;
-	}
-
-	protected function encodeHeader(){
-		if($this->protocol < 130){ //MCPE <= 1.1
-			$this->putByte(static::NETWORK_ID);
-		}else{
-			parent::encodeHeader();
-		}
+		$this->objectiveName = $this->getString();
 	}
 
 	protected function encodePayload(){
-		$this->putInt($this->status);
+		$this->putString($this->objectiveName);
 	}
 
 	public function handle(NetworkSession $session) : bool{
-		return $session->handlePlayStatus($this);
+		return $session->handleRemoveObjective($this);
 	}
-
 }
