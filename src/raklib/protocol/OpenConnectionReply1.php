@@ -13,33 +13,33 @@
  *
  */
 
+declare(strict_types=1);
+
 namespace raklib\protocol;
 
 #include <rules/RakLibPacket.h>
 
+class OpenConnectionReply1 extends OfflineMessage{
+	public static $ID = MessageIdentifiers::ID_OPEN_CONNECTION_REPLY_1;
 
-use raklib\RakLib;
-
-class OPEN_CONNECTION_REPLY_1 extends Packet{
-	public static $ID = 0x06;
-
+	/** @var int */
 	public $serverID;
-	public $security;
+	/** @var bool */
+	public $serverSecurity = false;
+	/** @var int */
 	public $mtuSize;
 
-	public function encode(){
-		parent::encode();
-		$this->put(RakLib::MAGIC);
+	protected function encodePayload() : void{
+		$this->writeMagic();
 		$this->putLong($this->serverID);
-		$this->putByte(0); //Server security
+		$this->putByte($this->serverSecurity ? 1 : 0);
 		$this->putShort($this->mtuSize);
 	}
 
-	public function decode(){
-		parent::decode();
-		$this->offset += 16; //Magic
+	protected function decodePayload() : void{
+		$this->readMagic();
 		$this->serverID = $this->getLong();
-		$this->security = $this->getByte(); //security
+		$this->serverSecurity = $this->getByte() !== 0;
 		$this->mtuSize = $this->getShort();
 	}
 }

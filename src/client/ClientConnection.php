@@ -9,15 +9,14 @@ use pocketmine\network\mcpe\protocol\PacketPool;
 use pocketmine\utils\BinaryStream;
 
 use raklib\protocol\ACK;
-use raklib\protocol\CLIENT_DISCONNECT_DataPacket;
-use raklib\protocol\DATA_PACKET_0;
-use raklib\protocol\DATA_PACKET_4;
-use raklib\protocol\DataPacket;
+use raklib\protocol\ConnectedPong;
+use raklib\protocol\ConnectionRequestAccepted;
+use raklib\protocol\Datagram;
+use raklib\protocol\DisconnectionNotification;
 use raklib\protocol\EncapsulatedPacket;
+use raklib\protocol\IncompatibleProtocolVersion;
 use raklib\protocol\Packet;
-use raklib\protocol\PONG_DataPacket;
-use raklib\protocol\SERVER_HANDSHAKE_DataPacket;
-use raklib\protocol\UNCONNECTED_PING;
+use raklib\protocol\UnconnectedPing;
 use raklib\server\UDPServerSocket;
 
 use client\Tickable;
@@ -119,7 +118,7 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 			$encapsulated->reliability = 0;
 			$encapsulated->buffer = $packet->buffer;
 
-			$sendPacket = new DATA_PACKET_4();
+			$sendPacket = new Datagram();
 			$sendPacket->seqNumber = $this->sequenceNumber++;
 			$sendPacket->packets[] = $encapsulated->toBinary();
 
@@ -141,7 +140,7 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 			if (($packet = StaticPacketPool::getPacketFromPool(ord($buffer{0}))) !== null) {
 				$packet->buffer = $buffer;
 				$packet->decode();
-				if ($packet instanceof DataPacket) {
+				if ($packet instanceof Datagram) {
 					$this->ackQueue[$packet->seqNumber] = $packet->seqNumber;
 				}
 				return $packet;
@@ -154,7 +153,7 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 
 	public function tick(){
 		if($this->getStatus() === ClientConnection::STATUS_NONE && $this->lastSendTime !== time()){
-			$ping = new UNCONNECTED_PING();
+			$ping = new UnconnectedPing();
 			$ping->pingID = $this->pingCount++;
 			$this->sendPacket($ping);
 		}
@@ -166,22 +165,27 @@ class ClientConnection extends UDPServerSocket implements Tickable{
 		}
 		$pk = $this->receivePacket();
 		if($pk instanceof Packet){
-			if($pk instanceof DataPacket){
+			if($pk instanceof Datagram){
 				foreach($pk->packets as $pk){
 					$id = ord($pk->buffer{0});
-					if(SERVER_HANDSHAKE_DataPacket::$ID === $id){
-						$new = new SERVER_HANDSHAKE_DataPacket();
+					if(ConnectionRequestAccepted::$ID === $id){
+						$new = new ConnectionRequestAccepted();
 						$new->buffer = $pk->buffer;
 						$new->decode();
 						$this->client->handlePacket($this, $new);
-					}elseif(PONG_DataPacket::$ID === $id){
-						$new = new PONG_DataPacket();
+					}elseif(ConnectedPong::$ID === $id){
+						$new = new ConnectedPong();
 						$new->buffer = $pk->buffer;
 						$new->decode();
 						$this->client->handlePacket($this, $new);
-					}elseif(CLIENT_DISCONNECT_DataPacket::$ID === $id){
+					}elseif(DisconnectionNotification::$ID === $id){
 						$this->setStatus(ClientConnection::STATUS_DISCONNECTED);
 						echo "[Status]Disconnected from server." . PHP_EOL;
+						echo "Thanks for using!" . PHP_EOL;
+						exit(0);
+					}elseif(IncompatibleProtocolVersion::$ID === $id){
+						$this->setStatus(ClientConnection::STATUS_DISCONNECTED);
+						echo "[Status]Incompatible protocol version." . PHP_EOL;
 						echo "Thanks for using!" . PHP_EOL;
 						exit(0);
 					}else{

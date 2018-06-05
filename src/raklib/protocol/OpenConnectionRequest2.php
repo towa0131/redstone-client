@@ -13,36 +13,34 @@
  *
  */
 
+declare(strict_types=1);
+
 namespace raklib\protocol;
 
 #include <rules/RakLibPacket.h>
 
+use raklib\utils\InternetAddress;
 
-use raklib\RakLib;
+class OpenConnectionRequest2 extends OfflineMessage{
+	public static $ID = MessageIdentifiers::ID_OPEN_CONNECTION_REQUEST_2;
 
-class OPEN_CONNECTION_REQUEST_2 extends Packet{
-	public static $ID = 0x07;
-
+	/** @var int */
 	public $clientID;
+	/** @var InternetAddress */
 	public $serverAddress;
-	public $serverPort;
+	/** @var int */
 	public $mtuSize;
 
-	public function encode(){
-		parent::encode();
-		$this->buffer = chr(static::$ID);
-		$this->put(RakLib::MAGIC);
-		$this->putByte("4");
-		$this->put("3f57febe");
-		$this->putShort($this->serverPort);
+	protected function encodePayload() : void{
+		$this->writeMagic();
+		$this->putAddress($this->serverAddress);
 		$this->putShort($this->mtuSize);
 		$this->putLong($this->clientID);
 	}
 
-	public function decode(){
-		parent::decode();
-		$this->offset += 16; //Magic
-		$this->getAddress($this->serverAddress, $this->serverPort);
+	protected function decodePayload() : void{
+		$this->readMagic();
+		$this->serverAddress = $this->getAddress();
 		$this->mtuSize = $this->getShort();
 		$this->clientID = $this->getLong();
 	}

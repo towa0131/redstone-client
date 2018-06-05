@@ -13,8 +13,21 @@
  *
  */
 
+declare(strict_types=1);
+
 namespace raklib\protocol;
 
-class DATA_PACKET_0 extends DataPacket{
-	public static $ID = 0x80;
+class AdvertiseSystem extends Packet{
+	public static $ID = MessageIdentifiers::ID_ADVERTISE_SYSTEM;
+
+	/** @var string */
+	public $serverName;
+
+	protected function encodePayload() : void{
+		$this->putString($this->serverName);
+	}
+
+	protected function decodePayload() : void{
+		$this->serverName = $this->getString();
+	}
 }

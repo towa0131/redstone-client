@@ -13,6 +13,8 @@
  *
  */
 
+declare(strict_types=1);
+
 namespace raklib\protocol;
 
 #include <rules/RakLibPacket.h>
@@ -20,23 +22,23 @@ namespace raklib\protocol;
 
 use raklib\RakLib;
 
-class OPEN_CONNECTION_REQUEST_1 extends Packet{
-	public static $ID = 0x05;
+class OpenConnectionRequest1 extends OfflineMessage{
+	public static $ID = MessageIdentifiers::ID_OPEN_CONNECTION_REQUEST_1;
 
-	public $protocol = RakLib::PROTOCOL;
+	/** @var int */
+	public $protocol = RakLib::DEFAULT_PROTOCOL_VERSION;
+	/** @var int */
 	public $mtuSize;
 
-	public function encode(){
-		parent::encode();
-		$this->put(RakLib::MAGIC);
+	protected function encodePayload() : void{
+		$this->writeMagic();
 		$this->putByte($this->protocol);
-		$this->put(str_repeat(chr(0x00), $this->mtuSize - 18));
+		$this->buffer = str_pad($this->buffer, $this->mtuSize, "\x00");
 	}
 
-	public function decode(){
-		parent::decode();
-		$this->offset += 16; //Magic
+	protected function decodePayload() : void{
+		$this->readMagic();
 		$this->protocol = $this->getByte();
-		$this->mtuSize = strlen($this->get(true)) + 18;
+		$this->mtuSize = strlen($this->buffer);
 	}
 }

@@ -19,20 +19,22 @@ use pocketmine\network\mcpe\protocol\FullChunkDataPacket;
 use pocketmine\utils\Terminal;
 use pocketmine\utils\UUID;
 
-use raklib\protocol\CLIENT_HANDSHAKE_DataPacket;
-use raklib\protocol\CLIENT_CONNECT_DataPacket;
-use raklib\protocol\OPEN_CONNECTION_REPLY_1;
-use raklib\protocol\OPEN_CONNECTION_REPLY_2;
-use raklib\protocol\OPEN_CONNECTION_REQUEST_1;
-use raklib\protocol\OPEN_CONNECTION_REQUEST_2;
+use raklib\protocol\ConnectedPing;
+use raklib\protocol\ConnectionRequest;
+use raklib\protocol\ConnectionRequestAccepted;
+use raklib\protocol\OpenConnectionReply1;
+use raklib\protocol\OpenConnectionReply2;
+use raklib\protocol\OpenConnectionRequest1;
+use raklib\protocol\OpenConnectionRequest2;
+use raklib\protocol\NewIncomingConnection;
 use raklib\protocol\Packet;
-use raklib\protocol\PING_DataPacket;
-use raklib\protocol\SERVER_HANDSHAKE_DataPacket;
-use raklib\protocol\UNCONNECTED_PONG;
+use raklib\protocol\UnconnectedPong;
+
+use raklib\utils\InternetAddress;
 
 class MCPEClient implements Tickable{
 
-	const DEFAULT_MTU = 1465;
+	const DEFAULT_MTU = 1455;
 
 	private $name;
 
@@ -51,7 +53,7 @@ class MCPEClient implements Tickable{
 	public function handlePacket(ClientConnection $connection, Packet $packet){
 		echo "[Receive]" . get_class($packet) . PHP_EOL;
 		switch(get_class($packet)){
-			case UNCONNECTED_PONG::class:
+			case UnconnectedPong::class:
 				$connection->setStatus(ClientConnection::STATUS_CONNECTED);
 				echo "[Status]Connected to server." . PHP_EOL;
 				$rawData = $packet->serverName;
@@ -65,40 +67,39 @@ class MCPEClient implements Tickable{
 				echo "[ServerName]" . $data[7] . PHP_EOL;
 				echo "[Gamemode]" . $data[8] . PHP_EOL;
 				$connection->setName($rawData);
-				$pk = new OPEN_CONNECTION_REQUEST_1();
+				$pk = new OpenConnectionRequest1();
+				$pk->protocol = 8; // MCPE RakNet Protocol Version
 				$pk->mtuSize = self::DEFAULT_MTU;
 				$connection->sendPacket($pk);
 				break;
-			case OPEN_CONNECTION_REPLY_1::class:
+			case OpenConnectionReply1::class:
 				echo "[ServerID]" . $packet->serverID . PHP_EOL;
 				echo "[Security]" . $packet->security . PHP_EOL;
 				echo "[MTU]" . $packet->mtuSize . PHP_EOL;
-				$pk = new OPEN_CONNECTION_REQUEST_2();
-				$pk->serverAddress = $connection->getAddress()->getIp();
-				$pk->serverPort = $connection->getAddress()->getPort();
+				$pk = new OpenConnectionRequest2();
+				$pk->serverAddress = new InternetAddress($connection->getAddress()->getIp(), $connection->getAddress()->getPort(), 4);
 				$pk->mtuSize = self::DEFAULT_MTU;
-				$pk->clientID =$connection->getClientId();
+				$pk->clientID = $connection->getClientId();
 				$connection->sendPacket($pk);
 				break;
-			case OPEN_CONNECTION_REPLY_2::class:
+			case OpenConnectionReply2::class:
 				echo "[MTU]" . $packet->mtuSize . PHP_EOL;
-				$pk = new CLIENT_CONNECT_DataPacket();
+				$pk = new ConnectionRequest();
 				$pk->clientID = $connection->getClientId();
-				$pk->sendPing = mt_rand(1,100);
+				$pk->sendPingTime = mt_rand(1,100);
 				$connection->sendEncapsulatedPacket($pk);
 				break;
-			case SERVER_HANDSHAKE_DataPacket::class:
+			case ConnectionRequestAccepted::class:
 				$addresses = [];
-				$addresses[0] = ["127.0.0.1", 0, 4];
+				$addresses[0] = new InternetAddress("127.0.0.1", 0, 4);
 				for($i = 1;$i<10;$i++){
-					$addresses[$i] = ["0.0.0.0", 0, 4];
+					$addresses[$i] = new InternetAddress("0.0.0.0", 0, 4);
 				}
-				$pk = new CLIENT_HANDSHAKE_DataPacket();
-				$pk->address = $connection->getAddress()->getIp();
-				$pk->port = $connection->getAddress()->getPort();
+				$pk = new NewIncomingConnection();
+				$pk->address = new InternetAddress($connection->getAddress()->getIp(), $connection->getAddress()->getPort(), 4);
 				$pk->systemAddresses = $addresses;
-				$pk->sendPing = mt_rand(1,100);
-				$pk->sendPong = mt_rand(1,100);
+				$pk->sendPingTime = mt_rand(1,100);
+				$pk->sendPongTime = mt_rand(1,100);
 				$connection->sendEncapsulatedPacket($pk);
 
 				$connection->setStatus(ClientConnection::STATUS_CONNECTED_RAKNET);
@@ -145,8 +146,8 @@ class MCPEClient implements Tickable{
 				$pk->radius = 8;
 				$connection->sendEncapsulatedPacket($pk);
 */
-				$pk = new PING_DataPacket();
-				$pk->pingID = mt_rand(0, 100);
+				$pk = new ConnectedPing();
+				$pk->sendPingTime = mt_rand(0, 100);
 				$connection->sendEncapsulatedPacket($pk);
 				break;
 			default:

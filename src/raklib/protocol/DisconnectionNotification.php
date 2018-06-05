@@ -13,9 +13,18 @@
  *
  */
 
+declare(strict_types=1);
+
 namespace raklib\protocol;
 
+class DisconnectionNotification extends Packet{
+	public static $ID = MessageIdentifiers::ID_DISCONNECTION_NOTIFICATION;
 
-class DATA_PACKET_A extends DataPacket{
-	public static $ID = 0x8A;
+	protected function encodePayload() : void{
+
+	}
+
+	protected function decodePayload() : void{
+
+	}
 }

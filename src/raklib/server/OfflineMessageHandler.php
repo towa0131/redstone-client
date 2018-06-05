@@ -17,13 +17,15 @@ declare(strict_types=1);
 
 namespace raklib\server;
 
+use raklib\protocol\IncompatibleProtocolVersion;
 use raklib\protocol\OfflineMessage;
-use raklib\protocol\OPEN_CONNECTION_REPLY_1;
-use raklib\protocol\OPEN_CONNECTION_REPLY_2;
-use raklib\protocol\OPEN_CONNECTION_REQUEST_1;
-use raklib\protocol\OPEN_CONNECTION_REQUEST_2;
-use raklib\protocol\UNCONNECTED_PING;
-use raklib\protocol\UNCONNECTED_PONG;
+use raklib\protocol\OpenConnectionReply1;
+use raklib\protocol\OpenConnectionReply2;
+use raklib\protocol\OpenConnectionRequest1;
+use raklib\protocol\OpenConnectionRequest2;
+use raklib\protocol\UnconnectedPing;
+use raklib\protocol\UnconnectedPong;
+use raklib\utils\InternetAddress;
 
 class OfflineMessageHandler{
 	/** @var SessionManager */
@@ -33,38 +35,45 @@ class OfflineMessageHandler{
 		$this->sessionManager = $manager;
 	}
 
-	public function handle(OfflineMessage $packet, string $source, int $port){
+	public function handle(OfflineMessage $packet, InternetAddress $address) : bool{
 		switch($packet::$ID){
-			case UNCONNECTED_PING::$ID:
-				/** @var UNCONNECTED_PING $packet */
-				$pk = new UNCONNECTED_PONG();
+			case UnconnectedPing::$ID:
+				/** @var UnconnectedPing $packet */
+				$pk = new UnconnectedPong();
 				$pk->serverID = $this->sessionManager->getID();
 				$pk->pingID = $packet->pingID;
 				$pk->serverName = $this->sessionManager->getName();
-				$this->sessionManager->sendPacket($pk, $source, $port);
+				$this->sessionManager->sendPacket($pk, $address);
 				return true;
-			case OPEN_CONNECTION_REQUEST_1::$ID:
-				/** @var OPEN_CONNECTION_REQUEST_1 $packet */
-				$packet->protocol; //TODO: check protocol number and refuse connections
-				$pk = new OPEN_CONNECTION_REPLY_1();
-				$pk->mtuSize = $packet->mtuSize;
-				$pk->serverID = $this->sessionManager->getID();
-				$this->sessionManager->sendPacket($pk, $source, $port);
+			case OpenConnectionRequest1::$ID:
+				/** @var OpenConnectionRequest1 $packet */
+				$serverProtocol = $this->sessionManager->getProtocolVersion();
+				if($packet->protocol !== $serverProtocol){
+					$pk = new IncompatibleProtocolVersion();
+					$pk->protocolVersion = $serverProtocol;
+					$pk->serverId = $this->sessionManager->getID();
+					$this->sessionManager->sendPacket($pk, $address);
+					$this->sessionManager->getLogger()->notice("Refused connection from $address due to incompatible RakNet protocol version (expected $serverProtocol, got $packet->protocol)");
+				}else{
+					$pk = new OpenConnectionReply1();
+					$pk->mtuSize = $packet->mtuSize + 28; //IP header size (20 bytes) + UDP header size (8 bytes)
+					$pk->serverID = $this->sessionManager->getID();
+					$this->sessionManager->sendPacket($pk, $address);
+				}
 				return true;
-			case OPEN_CONNECTION_REQUEST_2::$ID:
-				/** @var OPEN_CONNECTION_REQUEST_2 $packet */
+			case OpenConnectionRequest2::$ID:
+				/** @var OpenConnectionRequest2 $packet */
 
-				if($packet->serverPort === $this->sessionManager->getPort() or !$this->sessionManager->portChecking){
-					$mtuSize = min(abs($packet->mtuSize), 1464); //Max size, do not allow creating large buffers to fill server memory
-					$pk = new OPEN_CONNECTION_REPLY_2();
+				if($packet->serverAddress->port === $this->sessionManager->getPort() or !$this->sessionManager->portChecking){
+					$mtuSize = min(abs($packet->mtuSize), $this->sessionManager->getMaxMtuSize()); //Max size, do not allow creating large buffers to fill server memory
+					$pk = new OpenConnectionReply2();
 					$pk->mtuSize = $mtuSize;
 					$pk->serverID = $this->sessionManager->getID();
-					$pk->clientAddress = $source;
-					$pk->clientPort = $port;
-					$this->sessionManager->sendPacket($pk, $source, $port);
-					$this->sessionManager->createSession($source, $port, $packet->clientID, $mtuSize);
+					$pk->clientAddress = $address;
+					$this->sessionManager->sendPacket($pk, $address);
+					$this->sessionManager->createSession($address, $packet->clientID, $mtuSize);
 				}else{
-					$this->sessionManager->getLogger()->debug("Not creating session for $source $port due to mismatched port, expected " . $this->sessionManager->getPort() . ", got " . $packet->serverPort);
+					$this->sessionManager->getLogger()->debug("Not creating session for $address due to mismatched port, expected " . $this->sessionManager->getPort() . ", got " . $packet->serverAddress->port);
 				}
 
 				return true;
