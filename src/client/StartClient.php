@@ -9,7 +9,7 @@ namespace client {
 	$name = trim(fgets(STDIN));
 
 	echo "Server IP : ";
-	$ip = trim(fgets(STDIN));
+	$ip = gethostbyname(trim(fgets(STDIN)));
 
 	echo "Server Port : ";
 	$port = (int)trim(fgets(STDIN));
