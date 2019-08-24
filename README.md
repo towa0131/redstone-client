@@ -11,16 +11,16 @@ git clone https://github.com/towa0131/RedStone-Client.git
  `cd RedStone-Client`
 ### Install composer
 ```
-# Download composer from composer homepage
+# Download composer from homepage
  curl -sS https://getcomposer.org/installer | php
 
-# Install composer
+# Install
  bin/php7/bin/php composer.phar install
 ```
 - Run a bash script
 `./start.sh`
 
-- Input your name and server address
+- Input your name and server address like:
 ```
 Name : Steve
 Server IP : sg.lbsg.net
@@ -28,8 +28,8 @@ Server Port : 19132
 ```
 - ~~You can join the server!~~
 
-**THIS TOOL IS UNDER DEVELOPMENT. SO YOU CANNOT JOIN THE SERVER.
-PACKET SEND/RECEIVE ONLY.**
+**THIS TOOL IS UNDER DEVELOPMENT. THEREFORE, YOU CANNOT JOIN ANY SERVER.
+PACKETS SENDING/RECEIVING ONLY.**
 
 ## Finished & Plan
  - [ ] Configuration File
@@ -46,7 +46,7 @@ PACKET SEND/RECEIVE ONLY.**
 **and more...**
 
 ## Reporting bugs
-Please report bugs to [issues](https://github.com/towa0131/RedStone-Client/issues/new) or [twitter](https://twitter.com/towa_towa0131)
+Please report bugs to [issues](https://github.com/towa0131/RedStone-Client/issues/new) or [twitter](https://twitter.com/usaminium)
 
 ## License
 See the LICENSE file for licensing information. [MIT LICENSE](https://opensource.org/licenses/MIT) will be applied to this software.
