@@ -1,5 +1,5 @@
-## What is RedStone-Client?
-**RedStone-Client** is Minecraft: Bedrock Edition Packet Analyze Tool.
+## What is RedStone Client?
+**RedStone Client** is a Packet Analysis Tool for Minecraft: Bedrock Edition.
 
 ## How to use?
 - Download from github to local.
