@@ -4,18 +4,33 @@
 ## How to use?
 - Download from github to local.
 ```
-git clone https://github.com/towa0131/RedStone-Client.git
+$ git clone https://github.com/towa0131/RedStone-Client.git
 ```
 - Type the following command from the command line:
 
  `cd RedStone-Client`
+
+### Compiling PHP
+```
+# Download scripts from repository
+$ git clone https://github.com/pmmp/php-build-scripts.git
+$ cd php-build-scripts
+
+# Compile
+$ ./compile.sh
+
+# Wait a few minutes ...
+# After compilation, move binary files to the pmmp directory
+$ mv bin ../
+```
+
 ### Install composer
 ```
 # Download composer from homepage
- curl -sS https://getcomposer.org/installer | php
+$ curl -sS https://getcomposer.org/installer | php
 
 # Install
- bin/php7/bin/php composer.phar install
+$ bin/php7/bin/php composer.phar install
 ```
 - Run a bash script
 `./start.sh`
